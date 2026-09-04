@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Mathematics - Class 1 | Fun with Shapes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #fef3c7;
+            color: #1e293b;
+            overflow-x: hidden;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        .app-container {
+            max-width: 820px;
+            width: 100%;
+            margin: 0 auto;
+            min-height: 100vh;
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow-x: hidden;
+            padding: 0;
+        }
+        .screen {
+            display: none;
+            padding: 16px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .screen.active { display: block; }
+        
+        /* Buttons */
+        .read-btn {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #4c1d95;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .read-btn:active { transform: translateY(3px); box-shadow: none; }
+        
+        .btn-main {
+            padding: 14px 18px;
+            border-radius: 14px;
+            font-weight: bold;
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 12px;
+            width: 100%;
+            color: white;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-main:active { transform: translateY(4px); box-shadow: none; }
+        .btn-action {
+            background-color: #10b981; color: white; padding: 12px 20px; border-radius: 10px;
+            font-weight: bold; box-shadow: 0 4px 0 #059669; cursor: pointer; border: none; width: 100%;
+        }
+        .btn-action:active { transform: translateY(4px); box-shadow: none; }
+
+        /* Headers & Cards */
+        .header {
+            background: linear-gradient(135deg, #f59e0b, #ea580c);
+            color: white;
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 16px;
+            margin-bottom: 18px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header h1 { font-size: 1.15rem; font-weight: 700; margin: 0; }
+        .back-btn { background: rgba(255,255,255,0.25); border: none; color: white; cursor: pointer; padding: 6px 12px; border-radius: 8px; font-weight:bold;}
+        .category-card { background: #fffbeb; border: 2px solid #fde68a; border-radius: 16px; padding: 16px; margin-bottom: 18px; }
+        .category-title { font-size: 1.15rem; font-weight: 700; color: #92400e; margin-bottom: 14px; border-bottom: 2px dashed #fbbf24; padding-bottom: 8px; }
+        .content-card { background-color: #ffffff; border: 2px solid #fcd34d; border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+        
+        /* Interactive Elements */
+        .color-palette { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 12px 0; }
+        .color-swatch { width: 40px; height: 40px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.2); cursor: pointer; }
+        .color-swatch.active { transform: scale(1.2); border-color: #1e293b; }
+        .trace-canvas { border: 3px dashed #fbbf24; border-radius: 12px; background: #fffbeb; touch-action: none; cursor: crosshair; width: 100%; display: block; }
+        .match-item { padding: 14px; background-color: #fef3c7; border: 3px solid #fde68a; border-radius: 12px; cursor: pointer; text-align: center; font-weight: bold; font-size: 1.1rem; }
+        .match-item.selected { background-color: #bae6fd; border-color: #0284c7; }
+        .match-item.matched { background-color: #bbf7d0; border-color: #16a34a; color: #16a34a; cursor: default; }
+
+        /* Zoom controls */
+        .zoom-controls { position: fixed; bottom: 20px; right: 12px; z-index: 900; display: flex; flex-direction: column; gap: 6px; }
+        .zoom-btn { width: 44px; height: 44px; border-radius: 50%; border: none; background: #ea580c; color: white; font-size: 1.4rem; font-weight: bold; box-shadow: 0 3px 8px rgba(0,0,0,0.25); cursor: pointer; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @media print { 
+            .no-print { display: none !important; } 
+            .screen { display: block !important; padding: 0; } 
+            .header { display: none; }
+            .content-card { border: none; padding: 0; margin: 0; box-shadow: none; }
+            body { background-color: white; }
+        }
+    
+.app-container, .screen, .content-card, .header h1, p {
+  max-width: 100%; overflow-wrap: anywhere; word-break: break-word; box-sizing: border-box;
+}
+    </style>
+</head>
+<body>
+<div class="app-container" id="appBody">
+
+    <!-- HOME SCREEN -->
+    <div id="homeScreen" class="screen active">
+        <div class="text-center mb-5 pt-3">
+            <h1 class="text-3xl font-bold text-amber-700 mb-1">Mathematics - Class 1</h1>
+            <p class="text-amber-600 font-bold text-lg mb-1">Unit 1 : Fun with Shapes</p>
+            <p class="text-gray-600 font-semibold text-md mt-2 bg-gray-100 inline-block px-4 py-1 rounded-full border border-gray-300">Prepared by : Smart Vidhya</p>
+        </div>
+
+        <div class="category-card border-orange-200">
+            <h3 class="category-title text-orange-800">🎵 Songs</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <button class="btn-main bg-pink-500" onclick="showScreen('song1Screen')">🎤 Dad Making Dosa</button>
+                <button class="btn-main bg-rose-500" onclick="showScreen('song2Screen')">🎤 Song of Shapes</button>
+            </div>
+        </div>
+
+        <div class="category-card border-blue-200">
+            <h3 class="category-title text-blue-800">🎨 Colour the Pictures</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <button class="btn-main bg-blue-500" onclick="showScreen('colorShapesScreen')">🏠 House & Boat</button>
+                <button class="btn-main bg-sky-500" onclick="showScreen('colorVehiclesScreen')">🚌 Vehicles</button>
+                <button class="btn-main bg-cyan-500" onclick="showScreen('colorRobotScreen')">🤖 Robot</button>
+                <button class="btn-main bg-indigo-500" onclick="showScreen('colorTrainScreen')">🚂 Train (Workbook)</button>
+                <button class="btn-main bg-violet-500" onclick="showScreen('colorAnimalsScreen')">🐦 Bird & Fox</button>
+            </div>
+        </div>
+
+        <div class="category-card border-green-200">
+            <h3 class="category-title text-green-800">✏️ Draw & Match</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <button class="btn-main bg-green-500" onclick="initTrace(); showScreen('traceScreen')">🖊️ Draw Shapes</button>
+                <button class="btn-main bg-emerald-500" onclick="showScreen('patternScreen')">🧩 Complete the Pattern</button>
+                <button class="btn-main bg-teal-500" onclick="showScreen('beadsScreen')">📿 Pearl Chain</button>
+                <button class="btn-main bg-lime-500" onclick="showScreen('matchScreen')">🔄 Match the Shapes</button>
+                <button class="btn-main bg-green-600" onclick="showScreen('missingPartsScreen')">🐶 Missing Parts</button>
+                <button class="btn-main bg-emerald-600" onclick="showScreen('drawNextScreen')">➡️ Draw the Next</button>
+            </div>
+        </div>
+
+        <div class="category-card border-purple-200">
+            <h3 class="category-title text-purple-800">📝 Practice Corner</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <button class="btn-main bg-violet-500" onclick="showScreen('connectionsScreen')">🔗 Connections</button>
+                <button class="btn-main bg-purple-600" onclick="showScreen('dotDrawingScreen')">🌲 Dot Drawing</button>
+                <button class="btn-main bg-fuchsia-500" onclick="showScreen('aroundHomeScreen')">🏡 Around Home</button>
+            </div>
+        </div>
+
+        <div class="category-card border-red-200">
+            <h3 class="category-title text-red-800">📋 Exam Corner</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <button class="btn-main bg-red-500" onclick="showScreen('modelQPScreen')">📋 Model Questions</button>
+                <button class="btn-main bg-rose-600" onclick="showScreen('lessonQPScreen')">📄 Lesson Questions</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SONG 1 SCREEN -->
+    <div id="song1Screen" class="screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('homeScreen')">⬅ Back</button>
+            <h1>Dad Making Dosa</h1>
+        </div>
+        <div class="content-card text-center" style="background: #fce7f3; border-color: #f9a8d4;">
+            <p class="text-xl font-bold text-pink-700 mb-4">🎵 Dosa Song 🎵</p>
+            <p class="text-lg leading-loose text-gray-800 font-bold" id="songText1">
+                Dosa, dosa!<br>
+                Hissing dosa<br>
+                Sizzling dosa<br>
+                Dad making dosa<br>
+                Mom serving dosa<br>
+                Small and round dosa<br>
+                Nice and tasty dosa
+            </p>
+            <button class="read-btn" onclick="speakEnglish('songText1')">🔊 Listen & Learn</button>
+        </div>
+    </div>
+
+    <!-- SONG 2 SCREEN -->
+    <div id="song2Screen" class="screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('homeScreen')">⬅ Back</button>
+            <h1>Song of Shapes</h1>
+        </div>
+        <div class="content-card text-center" style="background: #e0e7ff; border-color: #a5b4fc;">
+            <p class="text-lg leading-loose text-gray-800 font-bold" id="songText2">
+                What is round? What is round?<br>
+                Dosa is round! Dosa is round!<br>
+                What is round? What is round?<br>
+                Bangle is round! Bangle is round!<br><br>
+                What is oblong? What is oblong?<br>
+                Box is oblong! Box is oblong!<br>
+                What is oblong? What is oblong?<br>
+                Book is oblong! Book is oblong!
+            </p>
+            <button class="read-btn" onclick="speakEnglish('songText2')">🔊 Listen & Learn</button>
+        </div>
+    </div>
+
+    <!-- COLORING: HOUSE AND BOAT -->
+    <div id="colorShapesScreen" class="screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('homeScreen')">⬅ Back</button>
+            <h1>House & Boat</h1>
+        </div>
+        <div class="content-card text-center">
+            <p id="colorIns1" class="font-bold text-gray-700 mb-2">Select a colour and colour the pictures!</p>
+            <button class="read-btn text-sm mb-3" onclick="speakEnglish('colorIns1')">🔊 Instruction</button>
+            
+            <div class="color-palette">
+                <div class="color-swatch" style="background:#ef4444" onclick="setSVGColor('#ef4444')"></div>
+                <div class="color-swatch" style="background:#eab308" onclick="setSVGColor('#eab308')"></div>
+                <div class="color-swatch" style="background:#22c55e" onclick="setSVGColor('#22c55e')"></div>
+                <div class="color-swatch" style="background:#3b82f6" onclick="setSVGColor('#3b82f6')"></div>
+                <div class="color-swatch" style="background:#a855f7" onclick="setSVGColor('#a855f7')"></div>
+                <div class="color-swatch" style="background:#f97316" onclick="setSVGColor('#f97316')"></div>
+            </div>
+
+            <div class="flex flex-col items-center gap-6 mt-6">
+                <!-- Boat SVG -->
+                <svg viewBox="0 0 200 140" width="220" height="160">
+                    <polygon points="100,15 150,75 50,75" style="fill:#fff; stroke:#333; stroke-width:3; cursor:pointer;" onclick="colorPath(this)"/>
+                    <rect x="55" y="75" width="90" height="35" style="fill:#fff; stroke:#333; stroke-width:3; cursor:pointer;" onclick="colorPath(this)"/>
+                    <polygon points="55,75 30,110 55,110" style="fill:#fff; stroke:#333; stroke-width:3; cursor:pointer;" onclick="colorPath(this)"/>
+                    <polygon points="145,75 170,110 145,110" style="fill:#fff; stroke:#333; stroke-width:3; cursor:pointer;" onclick="colorPath(this)"/>
+                    <circle cx="175" cy="95" r="12" style="fill:#fff; stroke:#333; stroke-width:3; cursor:pointer;" onclick="colorPath(this)"/>
+                    <line x1="100" y1="15" x2="100" y2="45" stroke="#333" stroke-width="3"/>
+                    <polygon points="100,15 120,35 100,35" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                </svg>
+                
+                <!-- House SVG -->
+                <svg viewBox="0 0 180 170" width="200" height="180">
+                    <polygon points="90,20 150,80 30,80" style="fill:#fff; stroke:#333; stroke-width:3; cursor:pointer;" onclick="colorPath(this)"/>
+                    <rect x="40" y="80" width="100" height="70" style="fill:#fff; stroke:#333; stroke-width:3; cursor:pointer;" onclick="colorPath(this)"/>
+                    <rect x="70" y="110" width="40" height="40" style="fill:#fff; stroke:#333; stroke-width:3; cursor:pointer;" onclick="colorPath(this)"/>
+                    <circle cx="35" cy="50" r="18" style="fill:#fff; stroke:#333; stroke-width:3; cursor:pointer;" onclick="colorPath(this)"/>
+                    <!-- Flower -->
+                    <circle cx="155" cy="100" r="12" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                    <circle cx="145" cy="90" r="6" style="fill:#fff; stroke:#333; stroke-width:1.5; cursor:pointer;" onclick="colorPath(this)"/>
+                    <circle cx="165" cy="90" r="6" style="fill:#fff; stroke:#333; stroke-width:1.5; cursor:pointer;" onclick="colorPath(this)"/>
+                    <circle cx="145" cy="110" r="6" style="fill:#fff; stroke:#333; stroke-width:1.5; cursor:pointer;" onclick="colorPath(this)"/>
+                    <circle cx="165" cy="110" r="6" style="fill:#fff; stroke:#333; stroke-width:1.5; cursor:pointer;" onclick="colorPath(this)"/>
+                    <rect x="152" y="112" width="6" height="25" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                </svg>
+            </div>
+            <button class="btn-action mt-6" onclick="clearColors()">Reset Colours</button>
+        </div>
+    </div>
+
+    <!-- COLORING: VEHICLES -->
+    <div id="colorVehiclesScreen" class="screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('homeScreen')">⬅ Back</button>
+            <h1>Vehicles</h1>
+        </div>
+        <div class="content-card text-center">
+            <p id="colorIns2" class="font-bold text-gray-700 mb-2">Colour the truck and the bus!</p>
+            <button class="read-btn text-sm mb-3" onclick="speakEnglish('colorIns2')">🔊 Instruction</button>
+            <div class="color-palette">
+                <div class="color-swatch" style="background:#ef4444" onclick="setSVGColor('#ef4444')"></div>
+                <div class="color-swatch" style="background:#eab308" onclick="setSVGColor('#eab308')"></div>
+                <div class="color-swatch" style="background:#22c55e" onclick="setSVGColor('#22c55e')"></div>
+                <div class="color-swatch" style="background:#3b82f6" onclick="setSVGColor('#3b82f6')"></div>
+                <div class="color-swatch" style="background:#a855f7" onclick="setSVGColor('#a855f7')"></div>
+                <div class="color-swatch" style="background:#64748b" onclick="setSVGColor('#64748b')"></div>
+            </div>
+
+            <div class="flex flex-col items-center gap-8 mt-4">
+                <!-- Truck -->
+                <svg viewBox="0 0 280 120" width="280" height="130">
+                    <rect x="20" y="50" width="80" height="40" style="fill:#fff; stroke:#333; stroke-width:2.5; cursor:pointer;" onclick="colorPath(this)"/>
+                    <rect x="100" y="40" width="120" height="50" style="fill:#fff; stroke:#333; stroke-width:2.5; cursor:pointer;" onclick="colorPath(this)"/>
+                    <polygon points="220,40 250,55 250,90 220,90" style="fill:#fff; stroke:#333; stroke-width:2.5; cursor:pointer;" onclick="colorPath(this)"/>
+                    <polygon points="20,50 5,70 20,70" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                    <circle cx="50" cy="100" r="15" style="fill:#fff; stroke:#333; stroke-width:2.5; cursor:pointer;" onclick="colorPath(this)"/>
+                    <circle cx="160" cy="100" r="15" style="fill:#fff; stroke:#333; stroke-width:2.5; cursor:pointer;" onclick="colorPath(this)"/>
+                    <circle cx="230" cy="100" r="15" style="fill:#fff; stroke:#333; stroke-width:2.5; cursor:pointer;" onclick="colorPath(this)"/>
+                </svg>
+
+                <!-- Bus -->
+                <svg viewBox="0 0 300 130" width="300" height="140">
+                    <rect x="40" y="30" width="200" height="60" style="fill:#fff; stroke:#333; stroke-width:2.5; cursor:pointer;" onclick="colorPath(this)"/>
+                    <polygon points="40,30 20,50 20,90 40,90" style="fill:#fff; stroke:#333; stroke-width:2.5; cursor:pointer;" onclick="colorPath(this)"/>
+                    <rect x="50" y="40" width="25" height="25" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                    <rect x="85" y="40" width="25" height="25" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                    <rect x="120" y="40" width="25" height="25" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                    <rect x="155" y="40" width="25" height="25" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                    <rect x="190" y="40" width="25" height="25" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                    <rect x="60" y="70" width="30" height="20" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                    <polygon points="110,75 120,65 130,75 120,85" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                    <polygon points="140,75 150,65 160,75 150,85" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                    <circle cx="70" cy="105" r="14" style="fill:#fff; stroke:#333; stroke-width:2.5; cursor:pointer;" onclick="colorPath(this)"/>
+                    <circle cx="180" cy="105" r="14" style="fill:#fff; stroke:#333; stroke-width:2.5; cursor:pointer;" onclick="colorPath(this)"/>
+                    <circle cx="220" cy="105" r="10" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                </svg>
+            </div>
+            <button class="btn-action mt-6" onclick="clearColors()">Reset Colours</button>
+        </div>
+    </div>
+
+    <!-- COLORING: ROBOT -->
+    <div id="colorRobotScreen" class="screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('homeScreen')">⬅ Back</button>
+            <h1>Robot</h1>
+        </div>
+        <div class="content-card text-center">
+            <p id="colorIns3" class="font-bold text-gray-700 mb-2">Join the dots in your mind and colour the robot!</p>
+            <button class="read-btn text-sm mb-3" onclick="speakEnglish('colorIns3')">🔊 Instruction</button>
+            <div class="color-palette">
+                <div class="color-swatch" style="background:#ef4444" onclick="setSVGColor('#ef4444')"></div>
+                <div class="color-swatch" style="background:#eab308" onclick="setSVGColor('#eab308')"></div>
+                <div class="color-swatch" style="background:#22c55e" onclick="setSVGColor('#22c55e')"></div>
+                <div class="color-swatch" style="background:#3b82f6" onclick="setSVGColor('#3b82f6')"></div>
+                <div class="color-swatch" style="background:#a855f7" onclick="setSVGColor('#a855f7')"></div>
+                <div class="color-swatch" style="background:#64748b" onclick="setSVGColor('#64748b')"></div>
+            </div>
+
+            <svg viewBox="0 0 220 280" width="220" height="280" class="mx-auto mt-4">
+                <!-- Head -->
+                <circle cx="110" cy="40" r="25" style="fill:#fff; stroke:#333; stroke-width:3; cursor:pointer;" onclick="colorPath(this)"/>
+                <rect x="70" y="65" width="80" height="55" rx="8" style="fill:#fff; stroke:#333; stroke-width:3; cursor:pointer;" onclick="colorPath(this)"/>
+                <circle cx="90" cy="85" r="8" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <circle cx="130" cy="85" r="8" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <rect x="95" y="100" width="30" height="8" rx="2" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <!-- Ears / Antennae -->
+                <polygon points="70,80 50,70 55,90" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <polygon points="150,80 170,70 165,90" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <!-- Body -->
+                <rect x="65" y="130" width="90" height="70" rx="6" style="fill:#fff; stroke:#333; stroke-width:3; cursor:pointer;" onclick="colorPath(this)"/>
+                <circle cx="85" cy="155" r="10" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <circle cx="110" cy="155" r="10" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <circle cx="135" cy="155" r="10" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <!-- Arms -->
+                <circle cx="40" cy="150" r="12" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <rect x="50" y="145" width="20" height="12" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <circle cx="180" cy="150" r="12" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <rect x="150" y="145" width="20" height="12" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <!-- Legs -->
+                <rect x="75" y="200" width="25" height="45" style="fill:#fff; stroke:#333; stroke-width:3; cursor:pointer;" onclick="colorPath(this)"/>
+                <rect x="120" y="200" width="25" height="45" style="fill:#fff; stroke:#333; stroke-width:3; cursor:pointer;" onclick="colorPath(this)"/>
+                <rect x="70" y="240" width="35" height="12" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <rect x="115" y="240" width="35" height="12" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+            </svg>
+            <p class="text-sm text-gray-500 mt-2">Wow! My robot! There are circles also on it.</p>
+            <button class="btn-action mt-4" onclick="clearColors()">Reset Colours</button>
+        </div>
+    </div>
+
+    <!-- COLORING: TRAIN (Workbook) -->
+    <div id="colorTrainScreen" class="screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('homeScreen')">⬅ Back</button>
+            <h1>Train (Workbook)</h1>
+        </div>
+        <div class="content-card text-center">
+            <p id="colorIns4" class="font-bold text-gray-700 mb-2">Give the same colour to these shapes in the picture.</p>
+            <button class="read-btn text-sm mb-3" onclick="speakEnglish('colorIns4')">🔊 Instruction</button>
+            
+            <div class="flex justify-center gap-4 mb-4">
+                <div class="flex flex-col items-center">
+                    <div class="w-12 h-8 bg-green-500 rounded"></div>
+                    <span class="text-xs mt-1">Green</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="w-0 h-0 border-l-[12px] border-r-[12px] border-b-[20px] border-l-transparent border-r-transparent border-b-yellow-400"></div>
+                    <span class="text-xs mt-1">Yellow</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="w-10 h-10 bg-purple-700 rounded-full"></div>
+                    <span class="text-xs mt-1">Purple</span>
+                </div>
+            </div>
+
+            <div class="color-palette">
+                <div class="color-swatch" style="background:#22c55e" onclick="setSVGColor('#22c55e')"></div>
+                <div class="color-swatch" style="background:#eab308" onclick="setSVGColor('#eab308')"></div>
+                <div class="color-swatch" style="background:#7e22ce" onclick="setSVGColor('#7e22ce')"></div>
+                <div class="color-swatch" style="background:#ef4444" onclick="setSVGColor('#ef4444')"></div>
+                <div class="color-swatch" style="background:#3b82f6" onclick="setSVGColor('#3b82f6')"></div>
+            </div>
+
+            <svg viewBox="0 0 320 160" width="300" height="160" class="mx-auto mt-4">
+                <!-- Engine cabin -->
+                <rect x="180" y="40" width="70" height="60" style="fill:#fff; stroke:#333; stroke-width:2.5; cursor:pointer;" onclick="colorPath(this)"/>
+                <rect x="190" y="50" width="30" height="25" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <!-- Roof -->
+                <rect x="175" y="30" width="80" height="15" style="fill:#fff; stroke:#333; stroke-width:2.5; cursor:pointer;" onclick="colorPath(this)"/>
+                <!-- Boiler -->
+                <rect x="90" y="55" width="90" height="45" style="fill:#fff; stroke:#333; stroke-width:2.5; cursor:pointer;" onclick="colorPath(this)"/>
+                <!-- Chimneys / Funnels -->
+                <rect x="100" y="25" width="20" height="30" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <polygon points="100,25 110,10 120,25" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <rect x="140" y="35" width="18" height="20" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <polygon points="140,35 149,20 158,35" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <!-- Front -->
+                <rect x="50" y="60" width="40" height="40" style="fill:#fff; stroke:#333; stroke-width:2.5; cursor:pointer;" onclick="colorPath(this)"/>
+                <polygon points="50,60 35,75 35,100 50,100" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <!-- Wheels -->
+                <circle cx="80" cy="115" r="18" style="fill:#fff; stroke:#333; stroke-width:2.5; cursor:pointer;" onclick="colorPath(this)"/>
+                <circle cx="140" cy="115" r="18" style="fill:#fff; stroke:#333; stroke-width:2.5; cursor:pointer;" onclick="colorPath(this)"/>
+                <circle cx="210" cy="115" r="18" style="fill:#fff; stroke:#333; stroke-width:2.5; cursor:pointer;" onclick="colorPath(this)"/>
+            </svg>
+            <button class="btn-action mt-6" onclick="clearColors()">Reset Colours</button>
+        </div>
+    </div>
+
+    <!-- COLORING: BIRD & FOX -->
+    <div id="colorAnimalsScreen" class="screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('homeScreen')">⬅ Back</button>
+            <h1>Bird & Fox</h1>
+        </div>
+        <div class="content-card text-center">
+            <p id="colorIns5" class="font-bold text-gray-700 mb-2">Colour the pictures made of shapes!</p>
+            <button class="read-btn text-sm mb-3" onclick="speakEnglish('colorIns5')">🔊 Instruction</button>
+            <div class="color-palette">
+                <div class="color-swatch" style="background:#ef4444" onclick="setSVGColor('#ef4444')"></div>
+                <div class="color-swatch" style="background:#eab308" onclick="setSVGColor('#eab308')"></div>
+                <div class="color-swatch" style="background:#22c55e" onclick="setSVGColor('#22c55e')"></div>
+                <div class="color-swatch" style="background:#3b82f6" onclick="setSVGColor('#3b82f6')"></div>
+                <div class="color-swatch" style="background:#a855f7" onclick="setSVGColor('#a855f7')"></div>
+                <div class="color-swatch" style="background:#f97316" onclick="setSVGColor('#f97316')"></div>
+                <div class="color-swatch" style="background:#64748b" onclick="setSVGColor('#64748b')"></div>
+            </div>
+
+            <div class="flex flex-col items-center gap-8 mt-4">
+                <!-- Bird -->
+                <svg viewBox="0 0 180 160" width="180" height="160">
+                    <circle cx="80" cy="70" r="40" style="fill:#fff; stroke:#333; stroke-width:2.5; cursor:pointer;" onclick="colorPath(this)"/>
+                    <circle cx="55" cy="45" r="22" style="fill:#fff; stroke:#333; stroke-width:2.5; cursor:pointer;" onclick="colorPath(this)"/>
+                    <circle cx="48" cy="40" r="5" style="fill:#333; stroke:#333; stroke-width:1;"/>
+                    <polygon points="30,40 15,35 30,50" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                    <path d="M70 55 Q90 40 100 60" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                    <polygon points="115,55 160,40 150,70 120,75" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                    <line x1="70" y1="110" x2="60" y2="140" stroke="#333" stroke-width="3"/>
+                    <line x1="90" y1="110" x2="100" y2="140" stroke="#333" stroke-width="3"/>
+                </svg>
+
+                <!-- Fox (simplified geometric) -->
+                <svg viewBox="0 0 180 180" width="180" height="180">
+                    <polygon points="90,20 130,60 50,60" style="fill:#fff; stroke:#333; stroke-width:2.5; cursor:pointer;" onclick="colorPath(this)"/>
+                    <polygon points="50,60 30,50 40,80" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                    <polygon points="130,60 150,50 140,80" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                    <polygon points="50,60 130,60 140,110 40,110" style="fill:#fff; stroke:#333; stroke-width:2.5; cursor:pointer;" onclick="colorPath(this)"/>
+                    <circle cx="70" cy="80" r="6" style="fill:#333;"/>
+                    <circle cx="110" cy="80" r="6" style="fill:#333;"/>
+                    <polygon points="40,110 70,140 50,160 30,140" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                    <polygon points="140,110 110,140 130,160 150,140" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                    <polygon points="70,140 110,140 100,165 80,165" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                </svg>
+            </div>
+            <button class="btn-action mt-6" onclick="clearColors()">Reset Colours</button>
+        </div>
+    </div>
+
+    <!-- TRACE / DRAW SHAPES -->
+    <div id="traceScreen" class="screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('homeScreen')">⬅ Back</button>
+            <h1>Draw Shapes</h1>
+        </div>
+        <div class="content-card text-center">
+            <p id="traceIns" class="font-bold text-gray-700 mb-2">Draw a circle, square and triangle below!</p>
+            <button class="read-btn text-sm mb-3" onclick="speakEnglish('traceIns')">🔊 Instruction</button>
+            
+            <div class="color-palette">
+                <div class="color-swatch" style="background:#1e293b" onclick="setTraceColor('#1e293b')"></div>
+                <div class="color-swatch" style="background:#ef4444" onclick="setTraceColor('#ef4444')"></div>
+                <div class="color-swatch" style="background:#3b82f6" onclick="setTraceColor('#3b82f6')"></div>
+                <div class="color-swatch" style="background:#22c55e" onclick="setTraceColor('#22c55e')"></div>
+            </div>
+
+            <canvas id="drawCanvas" class="trace-canvas" width="320" height="280"></canvas>
+            <div class="flex gap-3 mt-4">
+                <button class="btn-action" style="background:#ef4444; box-shadow:0 4px 0 #b91c1c;" onclick="clearCanvas()">Clear</button>
+            </div>
+            <p class="text-sm text-gray-500 mt-3">Try drawing: ○  □  △</p>
+        </div>
+    </div>
+
+    <!-- PATTERN SCREEN -->
+    <div id="patternScreen" class="screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('homeScreen')">⬅ Back</button>
+            <h1>Complete the Pattern</h1>
+        </div>
+        <div class="content-card">
+            <p id="patternIns" class="font-bold text-gray-700 mb-4 text-center">What comes next? Tap the correct shape.</p>
+            <button class="read-btn text-sm mb-4 mx-auto block" onclick="speakEnglish('patternIns')">🔊 Instruction</button>
+
+            <!-- Pattern 1 -->
+            <div class="mb-6 p-4 bg-amber-50 rounded-xl border-2 border-amber-200">
+                <p class="text-center font-bold mb-3">Pattern 1</p>
+                <div class="flex justify-center items-center gap-2 text-3xl mb-3">
+                    <span>⬜</span><span>⬜</span><span>⬜</span><span>⬜</span><span>❓</span>
+                </div>
+                <div class="flex justify-center gap-3">
+                    <button class="px-4 py-2 bg-white border-2 border-gray-300 rounded-lg text-2xl" onclick="checkPattern(this, true, '⬜')">⬜</button>
+                    <button class="px-4 py-2 bg-white border-2 border-gray-300 rounded-lg text-2xl" onclick="checkPattern(this, false)">🔺</button>
+                    <button class="px-4 py-2 bg-white border-2 border-gray-300 rounded-lg text-2xl" onclick="checkPattern(this, false)">🔵</button>
+                </div>
+            </div>
+
+            <!-- Pattern 2 -->
+            <div class="mb-6 p-4 bg-sky-50 rounded-xl border-2 border-sky-200">
+                <p class="text-center font-bold mb-3">Pattern 2</p>
+                <div class="flex justify-center items-center gap-2 text-3xl mb-3">
+                    <span>🔺</span><span>🔺</span><span>🔺</span><span>🔺</span><span>❓</span>
+                </div>
+                <div class="flex justify-center gap-3">
+                    <button class="px-4 py-2 bg-white border-2 border-gray-300 rounded-lg text-2xl" onclick="checkPattern(this, false)">⬜</button>
+                    <button class="px-4 py-2 bg-white border-2 border-gray-300 rounded-lg text-2xl" onclick="checkPattern(this, true, '🔺')">🔺</button>
+                    <button class="px-4 py-2 bg-white border-2 border-gray-300 rounded-lg text-2xl" onclick="checkPattern(this, false)">🔵</button>
+                </div>
+            </div>
+
+            <!-- Pattern 3 -->
+            <div class="mb-6 p-4 bg-green-50 rounded-xl border-2 border-green-200">
+                <p class="text-center font-bold mb-3">Pattern 3</p>
+                <div class="flex justify-center items-center gap-2 text-3xl mb-3">
+                    <span>🔵🔵🔵🔵</span><span>🔵🔵🔵</span><span>🔵🔵</span><span>❓</span>
+                </div>
+                <div class="flex justify-center gap-3">
+                    <button class="px-4 py-2 bg-white border-2 border-gray-300 rounded-lg text-xl" onclick="checkPattern(this, true, '🔵')">🔵</button>
+                    <button class="px-4 py-2 bg-white border-2 border-gray-300 rounded-lg text-xl" onclick="checkPattern(this, false)">🔵🔵</button>
+                    <button class="px-4 py-2 bg-white border-2 border-gray-300 rounded-lg text-xl" onclick="checkPattern(this, false)">⬜</button>
+                </div>
+            </div>
+
+            <!-- Pattern 4 -->
+            <div class="mb-4 p-4 bg-purple-50 rounded-xl border-2 border-purple-200">
+                <p class="text-center font-bold mb-3">Pattern 4</p>
+                <div class="flex justify-center items-center gap-2 text-2xl mb-3">
+                    <span>△△△</span><span>○△△</span><span>○○△</span><span>❓</span>
+                </div>
+                <div class="flex justify-center gap-3">
+                    <button class="px-3 py-2 bg-white border-2 border-gray-300 rounded-lg text-lg" onclick="checkPattern(this, true, '○○○')">○○○</button>
+                    <button class="px-3 py-2 bg-white border-2 border-gray-300 rounded-lg text-lg" onclick="checkPattern(this, false)">△△△</button>
+                    <button class="px-3 py-2 bg-white border-2 border-gray-300 rounded-lg text-lg" onclick="checkPattern(this, false)">○△○</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BEADS SCREEN -->
+    <div id="beadsScreen" class="screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('homeScreen')">⬅ Back</button>
+            <h1>Pearl Chain</h1>
+        </div>
+        <div class="content-card text-center">
+            <p id="beadsIns" class="font-bold text-gray-700 mb-2">Miya beaded red pearls and yellow pearls alternately. Colour the pearls in that order.</p>
+            <button class="read-btn text-sm mb-3" onclick="speakEnglish('beadsIns')">🔊 Instruction</button>
+            
+            <div class="color-palette">
+                <div class="color-swatch" style="background:#ef4444" onclick="setBeadColor('#ef4444')"></div>
+                <div class="color-swatch" style="background:#eab308" onclick="setBeadColor('#eab308')"></div>
+            </div>
+
+            <div id="beadContainer" class="flex flex-wrap justify-center gap-2 my-6 max-w-xs mx-auto"></div>
+            
+            <p class="text-sm text-gray-600 mb-3">Pattern: Red → Yellow → Red → Yellow ...</p>
+            <button class="btn-action" onclick="resetBeads()">Reset Chain</button>
+        </div>
+    </div>
+
+    <!-- MATCH SCREEN -->
+    <div id="matchScreen" class="screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('homeScreen')">⬅ Back</button>
+            <h1>Match the Shapes</h1>
+        </div>
+        <div class="content-card">
+            <p id="matchIns" class="font-bold text-gray-700 mb-4 text-center">Match the same shapes. Tap left then right.</p>
+            <button class="read-btn text-sm mb-4 mx-auto block" onclick="speakEnglish('matchIns')">🔊 Instruction</button>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div id="matchLeft" class="space-y-3">
+                    <div class="match-item" data-match="circle" onclick="handleMatch(this,'left')">🔵 Circle</div>
+                    <div class="match-item" data-match="square" onclick="handleMatch(this,'left')">⬜ Square</div>
+                    <div class="match-item" data-match="triangle" onclick="handleMatch(this,'left')">🔺 Triangle</div>
+                    <div class="match-item" data-match="rectangle" onclick="handleMatch(this,'left')">▭ Rectangle</div>
+                </div>
+                <div id="matchRight" class="space-y-3">
+                    <div class="match-item" data-match="triangle" onclick="handleMatch(this,'right')">🔺</div>
+                    <div class="match-item" data-match="rectangle" onclick="handleMatch(this,'right')">▭</div>
+                    <div class="match-item" data-match="circle" onclick="handleMatch(this,'right')">🔵</div>
+                    <div class="match-item" data-match="square" onclick="handleMatch(this,'right')">⬜</div>
+                </div>
+            </div>
+            <button class="btn-action mt-6" onclick="resetMatch()">Reset</button>
+        </div>
+    </div>
+
+    <!-- MISSING PARTS -->
+    <div id="missingPartsScreen" class="screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('homeScreen')">⬅ Back</button>
+            <h1>Missing Parts</h1>
+        </div>
+        <div class="content-card text-center">
+            <p id="missingIns" class="font-bold text-gray-700 mb-2">See the doggie? Draw the missing parts below!</p>
+            <button class="read-btn text-sm mb-3" onclick="speakEnglish('missingIns')">🔊 Instruction</button>
+
+            <div class="bg-sky-50 rounded-xl p-4 mb-4 inline-block">
+                <svg viewBox="0 0 160 100" width="160" height="100">
+                    <rect x="30" y="40" width="100" height="35" style="fill:#fde68a; stroke:#333; stroke-width:2;"/>
+                    <rect x="20" y="25" width="35" height="30" style="fill:#fde68a; stroke:#333; stroke-width:2;"/>
+                    <circle cx="30" cy="35" r="5" fill="#333"/>
+                    <circle cx="45" cy="35" r="5" fill="#333"/>
+                    <rect x="110" y="50" width="15" height="25" style="fill:#fde68a; stroke:#333; stroke-width:2;"/>
+                    <rect x="40" y="75" width="12" height="15" style="fill:#fde68a; stroke:#333; stroke-width:2;"/>
+                    <rect x="90" y="75" width="12" height="15" style="fill:#fde68a; stroke:#333; stroke-width:2;"/>
+                </svg>
+                <p class="text-xs text-gray-500">Complete dog</p>
+            </div>
+
+            <p class="font-semibold mb-2">Draw the missing parts:</p>
+            <canvas id="missingCanvas" class="trace-canvas" width="280" height="160"></canvas>
+            <div class="flex gap-3 mt-4">
+                <button class="btn-action" style="background:#ef4444; box-shadow:0 4px 0 #b91c1c;" onclick="clearMissingCanvas()">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DRAW THE NEXT -->
+    <div id="drawNextScreen" class="screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('homeScreen')">⬅ Back</button>
+            <h1>Draw the Next</h1>
+        </div>
+        <div class="content-card">
+            <p id="drawNextIns" class="font-bold text-gray-700 mb-4 text-center">Draw the next figure in each pattern.</p>
+            <button class="read-btn text-sm mb-4 mx-auto block" onclick="speakEnglish('drawNextIns')">🔊 Instruction</button>
+
+            <div class="space-y-6">
+                <div class="p-3 bg-amber-50 rounded-xl">
+                    <p class="text-center font-bold mb-2">1. Rectangles</p>
+                    <div class="flex justify-center gap-2 text-2xl">
+                        <span>▭</span><span>▭</span><span>▭</span><span>▭</span><span class="text-gray-400">?</span>
+                    </div>
+                </div>
+                <div class="p-3 bg-sky-50 rounded-xl">
+                    <p class="text-center font-bold mb-2">2. Triangles</p>
+                    <div class="flex justify-center gap-2 text-2xl">
+                        <span>△</span><span>△</span><span>△</span><span>△</span><span class="text-gray-400">?</span>
+                    </div>
+                </div>
+                <div class="p-3 bg-green-50 rounded-xl">
+                    <p class="text-center font-bold mb-2">3. Circles with dots</p>
+                    <div class="flex justify-center gap-2 text-xl">
+                        <span>●●●●</span><span>●●●</span><span>●●</span><span class="text-gray-400">?</span>
+                    </div>
+                </div>
+                <div class="p-3 bg-purple-50 rounded-xl">
+                    <p class="text-center font-bold mb-2">4. Growing sticks</p>
+                    <div class="flex justify-center gap-3 text-2xl">
+                        <span>|</span><span>||</span><span>|||</span><span class="text-gray-400">?</span>
+                    </div>
+                </div>
+            </div>
+            <p class="text-center text-sm text-gray-500 mt-4">Use the drawing area on paper or the Draw Shapes activity!</p>
+        </div>
+    </div>
+
+    <!-- CONNECTIONS -->
+    <div id="connectionsScreen" class="screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('homeScreen')">⬅ Back</button>
+            <h1>Connections</h1>
+        </div>
+        <div class="content-card text-center">
+            <p id="connIns" class="font-bold text-gray-700 mb-3">Connect each shape to objects of the same shape.</p>
+            <button class="read-btn text-sm mb-4" onclick="speakEnglish('connIns')">🔊 Instruction</button>
+
+            <div class="grid grid-cols-3 gap-4 mb-6">
+                <div class="p-3 bg-amber-100 rounded-xl border-2 border-amber-300">
+                    <div class="text-4xl mb-2">△</div>
+                    <p class="text-xs font-bold">Triangle</p>
+                </div>
+                <div class="p-3 bg-sky-100 rounded-xl border-2 border-sky-300">
+                    <div class="text-4xl mb-2">○</div>
+                    <p class="text-xs font-bold">Circle</p>
+                </div>
+                <div class="p-3 bg-green-100 rounded-xl border-2 border-green-300">
+                    <div class="text-4xl mb-2">□</div>
+                    <p class="text-xs font-bold">Square</p>
+                </div>
+            </div>
+
+            <p class="font-semibold mb-3">Objects around us:</p>
+            <div class="grid grid-cols-2 gap-3 text-left">
+                <div class="p-3 bg-white border rounded-lg flex items-center gap-2">
+                    <span class="text-2xl">🔺</span> <span>Samosa / Pizza slice</span>
+                </div>
+                <div class="p-3 bg-white border rounded-lg flex items-center gap-2">
+                    <span class="text-2xl">🔵</span> <span>Plate / Ball / Clock</span>
+                </div>
+                <div class="p-3 bg-white border rounded-lg flex items-center gap-2">
+                    <span class="text-2xl">📱</span> <span>Phone / Book (rectangle)</span>
+                </div>
+                <div class="p-3 bg-white border rounded-lg flex items-center gap-2">
+                    <span class="text-2xl">🟢</span> <span>Bangle / Wheel</span>
+                </div>
+                <div class="p-3 bg-white border rounded-lg flex items-center gap-2">
+                    <span class="text-2xl">📦</span> <span>Box / Window</span>
+                </div>
+                <div class="p-3 bg-white border rounded-lg flex items-center gap-2">
+                    <span class="text-2xl">🍃</span> <span>Leaf (triangle-ish)</span>
+                </div>
+            </div>
+            <p class="text-sm text-gray-500 mt-4">Look around you and find more objects of these shapes!</p>
+        </div>
+    </div>
+
+    <!-- DOT DRAWING -->
+    <div id="dotDrawingScreen" class="screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('homeScreen')">⬅ Back</button>
+            <h1>Dot Drawing</h1>
+        </div>
+        <div class="content-card text-center">
+            <p id="dotIns" class="font-bold text-gray-700 mb-2">There's a snack which looks like a triangle... Samosa! Join the dots and colour the tree.</p>
+            <button class="read-btn text-sm mb-3" onclick="speakEnglish('dotIns')">🔊 Instruction</button>
+
+            <div class="color-palette">
+                <div class="color-swatch" style="background:#22c55e" onclick="setSVGColor('#22c55e')"></div>
+                <div class="color-swatch" style="background:#16a34a" onclick="setSVGColor('#16a34a')"></div>
+                <div class="color-swatch" style="background:#15803d" onclick="setSVGColor('#15803d')"></div>
+                <div class="color-swatch" style="background:#92400e" onclick="setSVGColor('#92400e')"></div>
+            </div>
+
+            <svg viewBox="0 0 160 200" width="180" height="220" class="mx-auto">
+                <!-- Tree triangles -->
+                <polygon points="80,20 110,70 50,70" style="fill:#fff; stroke:#333; stroke-width:2.5; stroke-dasharray:4; cursor:pointer;" onclick="colorPath(this)"/>
+                <polygon points="80,50 120,110 40,110" style="fill:#fff; stroke:#333; stroke-width:2.5; stroke-dasharray:4; cursor:pointer;" onclick="colorPath(this)"/>
+                <polygon points="80,90 130,160 30,160" style="fill:#fff; stroke:#333; stroke-width:2.5; stroke-dasharray:4; cursor:pointer;" onclick="colorPath(this)"/>
+                <rect x="70" y="160" width="20" height="30" style="fill:#fff; stroke:#333; stroke-width:2.5; stroke-dasharray:4; cursor:pointer;" onclick="colorPath(this)"/>
+            </svg>
+            <button class="btn-action mt-4" onclick="clearColors()">Reset</button>
+        </div>
+    </div>
+
+    <!-- AROUND HOME -->
+    <div id="aroundHomeScreen" class="screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('homeScreen')">⬅ Back</button>
+            <h1>Around Home</h1>
+        </div>
+        <div class="content-card text-center">
+            <p id="homeIns" class="font-bold text-gray-700 mb-2">Look at the picture and colour the one given below.</p>
+            <button class="read-btn text-sm mb-3" onclick="speakEnglish('homeIns')">🔊 Instruction</button>
+
+            <div class="color-palette">
+                <div class="color-swatch" style="background:#22c55e" onclick="setSVGColor('#22c55e')"></div>
+                <div class="color-swatch" style="background:#92400e" onclick="setSVGColor('#92400e')"></div>
+                <div class="color-swatch" style="background:#ea580c" onclick="setSVGColor('#ea580c')"></div>
+                <div class="color-swatch" style="background:#3b82f6" onclick="setSVGColor('#3b82f6')"></div>
+                <div class="color-swatch" style="background:#64748b" onclick="setSVGColor('#64748b')"></div>
+            </div>
+
+            <svg viewBox="0 0 280 180" width="280" height="180" class="mx-auto mt-2">
+                <!-- Mountains -->
+                <polygon points="40,80 80,30 120,80" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <polygon points="100,80 140,40 180,80" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <polygon points="160,80 200,35 240,80" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <!-- Trees -->
+                <polygon points="50,100 70,60 90,100" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <rect x="65" y="100" width="10" height="25" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <polygon points="40,120 60,85 80,120" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <rect x="55" y="120" width="10" height="20" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <!-- House -->
+                <polygon points="130,90 170,60 210,90" style="fill:#fff; stroke:#333; stroke-width:2.5; cursor:pointer;" onclick="colorPath(this)"/>
+                <rect x="140" y="90" width="60" height="45" style="fill:#fff; stroke:#333; stroke-width:2.5; cursor:pointer;" onclick="colorPath(this)"/>
+                <rect x="160" y="105" width="20" height="30" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <!-- Round trees -->
+                <circle cx="230" cy="95" r="18" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <rect x="225" y="113" width="10" height="22" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <circle cx="255" cy="100" r="15" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <rect x="250" y="115" width="10" height="20" style="fill:#fff; stroke:#333; stroke-width:2; cursor:pointer;" onclick="colorPath(this)"/>
+                <!-- Ground -->
+                <ellipse cx="140" cy="150" rx="120" ry="20" style="fill:#fff; stroke:#333; stroke-width:1.5; cursor:pointer;" onclick="colorPath(this)"/>
+            </svg>
+            <button class="btn-action mt-4" onclick="clearColors()">Reset Colours</button>
+        </div>
+    </div>
+
+    <!-- MODEL QUESTIONS (Hide & Seek Answers) -->
+    <div id="modelQPScreen" class="screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('homeScreen')">⬅ Back</button>
+            <h1>Model Questions</h1>
+        </div>
+        <div class="content-card">
+            <p class="text-center font-bold text-amber-700 mb-4">📋 Model Question Paper – Fun with Shapes</p>
+            <p class="text-sm text-center text-gray-600 mb-4">Tap “Show Answer” to reveal. Tap again to hide.</p>
+
+            <!-- Q1 -->
+            <div class="mb-5 p-4 bg-amber-50 rounded-xl border-2 border-amber-200">
+                <p class="font-bold text-gray-800 mb-2">1. What shape is a dosa?</p>
+                <div class="flex gap-2 mb-2">
+                    <button class="px-3 py-1 bg-white border rounded-lg text-sm" onclick="toggleAnswer('ans1')">👁 Show / Hide Answer</button>
+                </div>
+                <div id="ans1" class="hidden p-3 bg-green-100 rounded-lg border border-green-300 text-green-800 font-semibold">
+                    ✅ Circle / Round
+                </div>
+            </div>
+
+            <!-- Q2 -->
+            <div class="mb-5 p-4 bg-sky-50 rounded-xl border-2 border-sky-200">
+                <p class="font-bold text-gray-800 mb-2">2. Name any two objects that are round.</p>
+                <div class="flex gap-2 mb-2">
+                    <button class="px-3 py-1 bg-white border rounded-lg text-sm" onclick="toggleAnswer('ans2')">👁 Show / Hide Answer</button>
+                </div>
+                <div id="ans2" class="hidden p-3 bg-green-100 rounded-lg border border-green-300 text-green-800 font-semibold">
+                    ✅ Bangle, Plate, Ball, Clock, Wheel, Dosa (any two)
+                </div>
+            </div>
+
+            <!-- Q3 -->
+            <div class="mb-5 p-4 bg-green-50 rounded-xl border-2 border-green-200">
+                <p class="font-bold text-gray-800 mb-2">3. What shape is a book or a box?</p>
+                <div class="flex gap-2 mb-2">
+                    <button class="px-3 py-1 bg-white border rounded-lg text-sm" onclick="toggleAnswer('ans3')">👁 Show / Hide Answer</button>
+                </div>
+                <div id="ans3" class="hidden p-3 bg-green-100 rounded-lg border border-green-300 text-green-800 font-semibold">
+                    ✅ Rectangle / Oblong
+                </div>
+            </div>
+
+            <!-- Q4 -->
+            <div class="mb-5 p-4 bg-purple-50 rounded-xl border-2 border-purple-200">
+                <p class="font-bold text-gray-800 mb-2">4. Draw a triangle and a square.</p>
+                <div class="flex gap-2 mb-2">
+                    <button class="px-3 py-1 bg-white border rounded-lg text-sm" onclick="toggleAnswer('ans4')">👁 Show / Hide Answer</button>
+                </div>
+                <div id="ans4" class="hidden p-3 bg-green-100 rounded-lg border border-green-300 text-green-800 font-semibold">
+                    ✅ Triangle: △ &nbsp;&nbsp; Square: □
+                </div>
+            </div>
+
+            <!-- Q5 -->
+            <div class="mb-5 p-4 bg-rose-50 rounded-xl border-2 border-rose-200">
+                <p class="font-bold text-gray-800 mb-2">5. Look at the pattern and say what comes next:<br>
+                <span class="text-2xl">🔺 🔺 🔺 🔺 ❓</span></p>
+                <div class="flex gap-2 mb-2">
+                    <button class="px-3 py-1 bg-white border rounded-lg text-sm" onclick="toggleAnswer('ans5')">👁 Show / Hide Answer</button>
+                </div>
+                <div id="ans5" class="hidden p-3 bg-green-100 rounded-lg border border-green-300 text-green-800 font-semibold">
+                    ✅ 🔺 (Triangle)
+                </div>
+            </div>
+
+            <!-- Q6 -->
+            <div class="mb-5 p-4 bg-indigo-50 rounded-xl border-2 border-indigo-200">
+                <p class="font-bold text-gray-800 mb-2">6. Colour only the circles in a robot picture. How many circles can you find?</p>
+                <div class="flex gap-2 mb-2">
+                    <button class="px-3 py-1 bg-white border rounded-lg text-sm" onclick="toggleAnswer('ans6')">👁 Show / Hide Answer</button>
+                </div>
+                <div id="ans6" class="hidden p-3 bg-green-100 rounded-lg border border-green-300 text-green-800 font-semibold">
+                    ✅ Usually 5–7 circles (head, eyes, buttons, hands etc.)
+                </div>
+            </div>
+
+            <!-- Q7 -->
+            <div class="mb-5 p-4 bg-yellow-50 rounded-xl border-2 border-yellow-200">
+                <p class="font-bold text-gray-800 mb-2">7. Match the shape with the object:<br>
+                Triangle → ? &nbsp;&nbsp; Circle → ? &nbsp;&nbsp; Square → ?</p>
+                <div class="flex gap-2 mb-2">
+                    <button class="px-3 py-1 bg-white border rounded-lg text-sm" onclick="toggleAnswer('ans7')">👁 Show / Hide Answer</button>
+                </div>
+                <div id="ans7" class="hidden p-3 bg-green-100 rounded-lg border border-green-300 text-green-800 font-semibold">
+                    ✅ Triangle → Samosa / Pizza slice<br>
+                    Circle → Plate / Ball / Clock<br>
+                    Square → Window / Box / Tile
+                </div>
+            </div>
+
+            <!-- Q8 -->
+            <div class="mb-4 p-4 bg-teal-50 rounded-xl border-2 border-teal-200">
+                <p class="font-bold text-gray-800 mb-2">8. Complete the pattern:<br>
+                <span class="text-xl">○ ○ ○ ● ○ ○ ○ ● ○ ○ ○ ❓</span></p>
+                <div class="flex gap-2 mb-2">
+                    <button class="px-3 py-1 bg-white border rounded-lg text-sm" onclick="toggleAnswer('ans8')">👁 Show / Hide Answer</button>
+                </div>
+                <div id="ans8" class="hidden p-3 bg-green-100 rounded-lg border border-green-300 text-green-800 font-semibold">
+                    ✅ ●
+                </div>
+            </div>
+
+            <button class="btn-action mt-2" onclick="hideAllAnswers()">Hide All Answers</button>
+        </div>
+    </div>
+
+    <!-- LESSON QUESTIONS (Print / Download) -->
+    <div id="lessonQPScreen" class="screen">
+        <div class="header no-print">
+            <button class="back-btn" onclick="showScreen('homeScreen')">⬅ Back</button>
+            <h1>Lesson Questions</h1>
+        </div>
+        <div class="content-card" id="lessonPrintArea">
+            <div class="text-center mb-4">
+                <h2 class="text-xl font-bold text-amber-700">Unit Test – Fun with Shapes</h2>
+                <p class="text-sm text-gray-600">Class 1 | Mathematics | Maximum Marks: 20</p>
+                <p class="text-sm text-gray-500">Name: _________________ &nbsp;&nbsp; Date: _____________</p>
+            </div>
+
+            <div class="space-y-5 text-left">
+                <div>
+                    <p class="font-bold">1. Colour the circle. (2 marks)</p>
+                    <div class="flex gap-6 mt-2 justify-center text-4xl">
+                        <span>△</span><span>○</span><span>□</span>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="font-bold">2. Draw a square and a triangle. (3 marks)</p>
+                    <div class="border-2 border-dashed border-gray-300 h-24 rounded-lg mt-2"></div>
+                </div>
+
+                <div>
+                    <p class="font-bold">3. Tick (✓) the round objects. (3 marks)</p>
+                    <div class="grid grid-cols-3 gap-3 mt-2 text-center text-sm">
+                        <div class="border p-2 rounded">Dosa</div>
+                        <div class="border p-2 rounded">Book</div>
+                        <div class="border p-2 rounded">Bangle</div>
+                        <div class="border p-2 rounded">Box</div>
+                        <div class="border p-2 rounded">Plate</div>
+                        <div class="border p-2 rounded">Window</div>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="font-bold">4. What comes next? Draw it. (3 marks)</p>
+                    <p class="text-2xl mt-1">🔺 🔺 🔺 🔺 ____</p>
+                    <p class="text-2xl mt-2">⬜ ⬜ ⬜ ⬜ ____</p>
+                </div>
+
+                <div>
+                    <p class="font-bold">5. Match the following. (4 marks)</p>
+                    <div class="grid grid-cols-2 gap-4 mt-2 text-sm">
+                        <div>
+                            <p>Circle</p>
+                            <p>Triangle</p>
+                            <p>Square</p>
+                            <p>Rectangle</p>
+                        </div>
+                        <div>
+                            <p>• Samosa</p>
+                            <p>• Ball</p>
+                            <p>• Door</p>
+                            <p>• Book</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="font-bold">6. Count and write how many triangles are there. (2 marks)</p>
+                    <div class="flex gap-2 justify-center text-3xl mt-2">
+                        <span>△</span><span>△</span><span>□</span><span>△</span><span>○</span><span>△</span>
+                    </div>
+                    <p class="mt-2">Number of triangles = ______</p>
+                </div>
+
+                <div>
+                    <p class="font-bold">7. Colour the shapes using the given colours. (3 marks)</p>
+                    <p class="text-sm">Red = Circle &nbsp;|&nbsp; Yellow = Triangle &nbsp;|&nbsp; Green = Square</p>
+                    <div class="flex gap-4 justify-center text-4xl mt-2">
+                        <span>○</span><span>△</span><span>□</span><span>○</span><span>△</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t text-center text-sm text-gray-500">
+                *** All the best ***
+            </div>
+        </div>
+
+        <div class="no-print flex flex-col gap-3 mt-4">
+            <button class="btn-action" style="background:#3b82f6; box-shadow:0 4px 0 #1d4ed8;" onclick="printLesson()">🖨️ Print Questions</button>
+            <button class="btn-action" style="background:#dc2626; box-shadow:0 4px 0 #991b1b;" onclick="downloadLessonPDF()">⬇️ Download as PDF</button>
+        </div>
+    </div>
+
+</div>
+
+<!-- Zoom Controls -->
+<div class="zoom-controls no-print">
+    <button class="zoom-btn" onclick="changeZoom(0.1)">+</button>
+    <button class="zoom-btn" onclick="changeZoom(-0.1)">−</button>
+</div>
+
+<script>
+    // Screen navigation
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        window.scrollTo(0,0);
+        if(id === 'missingPartsScreen') initMissingCanvas();
+        if(id === 'beadsScreen') generateBeads();
+    }
+
+    // Zoom
+    let currentZoom = 1;
+    function changeZoom(delta) {
+        currentZoom = Math.min(1.8, Math.max(0.7, currentZoom + delta));
+        document.getElementById('appBody').style.zoom = currentZoom;
+    }
+
+    // TTS - English
+    let ttsStopped = false, ttsAudio = null, ttsToken = 0;
+
+    function stopSpeaking(){
+        ttsStopped = true;
+        try{ if(ttsAudio){ ttsAudio.pause(); ttsAudio.src=''; ttsAudio=null; } }catch(e){}
+        if('speechSynthesis' in window) window.speechSynthesis.cancel();
+    }
+
+    function speakEnglish(elementId){
+        const el = document.getElementById(elementId);
+        if(!el) return;
+        const text = (el.innerText || el.textContent || '').trim();
+        if(!text) return;
+        stopSpeaking();
+        ttsStopped = false;
+        const token = ++ttsToken;
+
+        if('speechSynthesis' in window){
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = 'en-IN';
+            u.rate = 0.85;
+            u.pitch = 1.05;
+            u.onend = () => {};
+            window.speechSynthesis.speak(u);
+        }
+    }
+
+    // Coloring SVG
+    let svgColor = '#ef4444';
+    function setSVGColor(color) {
+        svgColor = color;
+        document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+    }
+    function colorPath(element) {
+        element.style.fill = svgColor;
+    }
+    function clearColors() {
+        document.querySelectorAll('svg [style*="fill"]').forEach(el => {
+            if(el.getAttribute('fill') !== '#333') {
+                el.style.fill = '#fff';
+            }
+        });
+    }
+
+    // Drawing Canvas
+    let canvas, ctx, drawing = false;
+    let traceColor = '#1e293b';
+    function initTrace() {
+        canvas = document.getElementById('drawCanvas');
+        if(!canvas) return;
+        ctx = canvas.getContext('2d');
+        
+        canvas.addEventListener('mousedown', startPos);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', endPos);
+        canvas.addEventListener('mouseout', endPos);
+        
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startPos(e.touches[0]); }, {passive: false});
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e.touches[0]); }, {passive: false});
+        canvas.addEventListener('touchend', endPos);
+    }
+    function getMousePos(e) {
+        let rect = canvas.getBoundingClientRect();
+        let scaleX = canvas.width / rect.width;
+        let scaleY = canvas.height / rect.height;
+        return {
+            x: (e.clientX - rect.left) * scaleX,
+            y: (e.clientY - rect.top) * scaleY
+        };
+    }
+    function startPos(e) { drawing = true; draw(e); }
+    function endPos() { drawing = false; ctx.beginPath(); }
+    function draw(e) {
+        if (!drawing) return;
+        let pos = getMousePos(e);
+        ctx.lineWidth = 6;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = traceColor;
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+    }
+    function setTraceColor(color) { traceColor = color; }
+    function clearCanvas() { if(ctx) ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+    // Missing parts canvas
+    let missingCanvas, missingCtx, missingDrawing = false;
+    function initMissingCanvas() {
+        missingCanvas = document.getElementById('missingCanvas');
+        if(!missingCanvas) return;
+        missingCtx = missingCanvas.getContext('2d');
+        // Draw the incomplete dog outline
+        missingCtx.strokeStyle = '#333';
+        missingCtx.lineWidth = 2;
+        missingCtx.strokeRect(40, 60, 160, 50);
+        missingCtx.strokeRect(20, 35, 50, 40);
+        missingCtx.beginPath();
+        missingCtx.arc(35, 50, 6, 0, Math.PI*2);
+        missingCtx.arc(55, 50, 6, 0, Math.PI*2);
+        missingCtx.stroke();
+        missingCtx.strokeRect(180, 70, 25, 40);
+        // Missing legs hint
+        missingCtx.setLineDash([4,4]);
+        missingCtx.strokeRect(60, 110, 18, 25);
+        missingCtx.strokeRect(140, 110, 18, 25);
+        missingCtx.setLineDash([]);
+
+        missingCanvas.onmousedown = (e) => { missingDrawing=true; missingDraw(e); };
+        missingCanvas.onmousemove = missingDraw;
+        missingCanvas.onmouseup = () => { missingDrawing=false; missingCtx.beginPath(); };
+        missingCanvas.onmouseout = () => { missingDrawing=false; };
+        missingCanvas.ontouchstart = (e) => { e.preventDefault(); missingDrawing=true; missingDraw(e.touches[0]); };
+        missingCanvas.ontouchmove = (e) => { e.preventDefault(); missingDraw(e.touches[0]); };
+        missingCanvas.ontouchend = () => { missingDrawing=false; missingCtx.beginPath(); };
+    }
+    function missingDraw(e) {
+        if(!missingDrawing) return;
+        let rect = missingCanvas.getBoundingClientRect();
+        let x = (e.clientX - rect.left) * (missingCanvas.width / rect.width);
+        let y = (e.clientY - rect.top) * (missingCanvas.height / rect.height);
+        missingCtx.lineWidth = 5;
+        missingCtx.lineCap = 'round';
+        missingCtx.strokeStyle = '#1e293b';
+        missingCtx.lineTo(x, y);
+        missingCtx.stroke();
+        missingCtx.beginPath();
+        missingCtx.moveTo(x, y);
+    }
+    function clearMissingCanvas() {
+        if(missingCtx) {
+            missingCtx.clearRect(0,0,missingCanvas.width, missingCanvas.height);
+            initMissingCanvas();
+        }
+    }
+
+    // Pattern Checking
+    function checkPattern(btn, isCorrect, correctEmoji) {
+        if(isCorrect) {
+            const parent = btn.closest('.p-4, .mb-6');
+            if(parent) {
+                const q = parent.querySelector('.text-3xl, .text-2xl, .text-xl');
+                if(q) q.innerHTML = q.innerHTML.replace('❓', correctEmoji || '✅');
+            }
+            alert('Correct! Well done! 👏');
+        } else {
+            alert('Oops! Try again.');
+        }
+    }
+
+    // Beads Pattern
+    let beadColor = '#ef4444';
+    function setBeadColor(c) { beadColor = c; }
+    function generateBeads() {
+        const container = document.getElementById('beadContainer');
+        if(!container) return;
+        container.innerHTML = '';
+        // Show example first few
+        const example = ['#ef4444','#eab308','#ef4444','#eab308','#ef4444'];
+        for(let i=0; i<12; i++) {
+            let bead = document.createElement('div');
+            bead.className = "w-11 h-11 rounded-full border-2 border-gray-400 cursor-pointer shadow";
+            if(i < 5) {
+                bead.style.backgroundColor = example[i];
+            } else {
+                bead.style.backgroundColor = '#fff';
+                bead.onclick = function() { this.style.backgroundColor = beadColor; };
+            }
+            container.appendChild(bead);
+        }
+    }
+    function resetBeads() { generateBeads(); }
+    
+    // Match Game
+    let selectedLeft = null;
+    function handleMatch(element, side) {
+        if(element.classList.contains('matched')) return;
+
+        if(side === 'left') {
+            document.querySelectorAll('#matchLeft .match-item').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedLeft = element;
+        } else if (side === 'right' && selectedLeft) {
+            let leftVal = selectedLeft.getAttribute('data-match');
+            let rightVal = element.getAttribute('data-match');
+            if(leftVal === rightVal) {
+                selectedLeft.classList.remove('selected');
+                selectedLeft.classList.add('matched');
+                element.classList.add('matched');
+                selectedLeft = null;
+            } else {
+                alert("Not matching! Find the correct shape.");
+                selectedLeft.classList.remove('selected');
+                selectedLeft = null;
+            }
+        }
+    }
+    function resetMatch() {
+        document.querySelectorAll('.match-item').forEach(el => {
+            el.classList.remove('selected', 'matched');
+        });
+        selectedLeft = null;
+    }
+
+    // Model Questions – Hide & Seek
+    function toggleAnswer(id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('hidden');
+    }
+    function hideAllAnswers() {
+        for (let i = 1; i <= 8; i++) {
+            const el = document.getElementById('ans' + i);
+            if (el) el.classList.add('hidden');
+        }
+    }
+
+    // Lesson Questions – Print & Download
+    function printLesson() {
+        const printContent = document.getElementById('lessonPrintArea').innerHTML;
+        const win = window.open('', '', 'width=800,height=900');
+        win.document.write(`
+            <html>
+            <head>
+                <title>Unit Test - Fun with Shapes</title>
+                <style>
+                    body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; }
+                    h2 { color: #b45309; text-align: center; }
+                    .border { border: 1px solid #ccc; padding: 8px; border-radius: 6px; }
+                    .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+                </style>
+            </head>
+            <body>${printContent}</body>
+            </html>
+        `);
+        win.document.close();
+        win.focus();
+        setTimeout(() => { win.print(); }, 400);
+    }
+
+    function downloadLessonPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+        const pageWidth = doc.internal.pageSize.getWidth();
+        let y = 18;
+
+        // Title
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(16);
+        doc.setTextColor(180, 83, 9);
+        doc.text('Unit Test – Fun with Shapes', pageWidth / 2, y, { align: 'center' });
+        y += 8;
+
+        doc.setFontSize(11);
+        doc.setTextColor(80, 80, 80);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Class 1  |  Mathematics  |  Maximum Marks: 20', pageWidth / 2, y, { align: 'center' });
+        y += 7;
+        doc.text('Name: _________________          Date: _____________', pageWidth / 2, y, { align: 'center' });
+        y += 12;
+
+        doc.setTextColor(30, 30, 30);
+        doc.setFontSize(11);
+
+        // Q1
+        doc.setFont('helvetica', 'bold');
+        doc.text('1. Colour the circle. (2 marks)', 15, y);
+        y += 8;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(16);
+        doc.text('△          ○          □', 30, y);
+        y += 12;
+
+        // Q2
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.text('2. Draw a square and a triangle. (3 marks)', 15, y);
+        y += 6;
+        doc.setDrawColor(180, 180, 180);
+        doc.rect(15, y, 180, 28);
+        y += 35;
+
+        // Q3
+        doc.setFont('helvetica', 'bold');
+        doc.text('3. Tick (✓) the round objects. (3 marks)', 15, y);
+        y += 8;
+        doc.setFont('helvetica', 'normal');
+        const objs = ['Dosa', 'Book', 'Bangle', 'Box', 'Plate', 'Window'];
+        objs.forEach((o, i) => {
+            const x = 20 + (i % 3) * 60;
+            if (i === 3) y += 10;
+            doc.rect(x, y - 4, 45, 9);
+            doc.text(o, x + 5, y + 2);
+        });
+        y += 16;
+
+        // Q4
+        doc.setFont('helvetica', 'bold');
+        doc.text('4. What comes next? Draw it. (3 marks)', 15, y);
+        y += 8;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(14);
+        doc.text('△  △  △  △  ____', 25, y);
+        y += 9;
+        doc.text('□  □  □  □  ____', 25, y);
+        y += 12;
+
+        // Q5
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.text('5. Match the following. (4 marks)', 15, y);
+        y += 8;
+        doc.setFont('helvetica', 'normal');
+        const left = ['Circle', 'Triangle', 'Square', 'Rectangle'];
+        const right = ['Samosa', 'Ball', 'Door', 'Book'];
+        left.forEach((l, i) => {
+            doc.text(l, 25, y);
+            doc.text('•  ' + right[i], 110, y);
+            y += 7;
+        });
+        y += 6;
+
+        // Q6
+        doc.setFont('helvetica', 'bold');
+        doc.text('6. Count and write how many triangles are there. (2 marks)', 15, y);
+        y += 8;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(14);
+        doc.text('△   △   □   △   ○   △', 30, y);
+        y += 9;
+        doc.setFontSize(11);
+        doc.text('Number of triangles = ______', 25, y);
+        y += 12;
+
+        // Q7
+        doc.setFont('helvetica', 'bold');
+        doc.text('7. Colour the shapes using the given colours. (3 marks)', 15, y);
+        y += 7;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.text('Red = Circle   |   Yellow = Triangle   |   Green = Square', 20, y);
+        y += 9;
+        doc.setFontSize(16);
+        doc.text('○      △      □      ○      △', 30, y);
+        y += 16;
+
+        // Footer
+        doc.setFontSize(10);
+        doc.setTextColor(120, 120, 120);
+        doc.text('*** All the best ***', pageWidth / 2, y, { align: 'center' });
+
+        doc.save('Class1_FunWithShapes_UnitTest.pdf');
+    }
+
+    // Initialize
+    window.onload = () => {
+        generateBeads();
+    }
+</script>
+</body>
+</html>
