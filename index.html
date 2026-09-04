@@ -116,10 +116,14 @@
             body { background-color: white; }
         }
     
-.app-container, .screen, .content-card, .header h1, p {
+.app-container, .screen, .content-card, .header h1, p, .category-title, .btn-main, h1, h2, h3, span, div {
   max-width: 100%; overflow-wrap: anywhere; word-break: break-word; box-sizing: border-box;
 }
+.content-card, .category-card {
+  overflow: hidden;
+}
     </style>
+
 </head>
 <body>
 <div class="app-container" id="appBody">
@@ -1034,8 +1038,32 @@
         document.getElementById('appBody').style.zoom = currentZoom;
     }
 
-    // TTS - English
+    // TTS - English (browser built-in, works offline, no external service)
     let ttsStopped = false, ttsAudio = null, ttsToken = 0;
+    let englishVoices = [];
+
+    function loadEnglishVoices() {
+        if (!('speechSynthesis' in window)) return;
+        const voices = window.speechSynthesis.getVoices();
+        englishVoices = voices.filter(v => 
+            v.lang.startsWith('en') && 
+            (v.lang.includes('US') || v.lang.includes('GB') || v.lang.includes('IN') || v.lang.includes('AU'))
+        );
+        // Prefer clear US/GB voices first
+        englishVoices.sort((a, b) => {
+            const score = (v) => {
+                if (v.lang.includes('en-US') || v.lang.includes('en-GB')) return 3;
+                if (v.lang.includes('en-IN')) return 2;
+                return 1;
+            };
+            return score(b) - score(a);
+        });
+    }
+
+    if ('speechSynthesis' in window) {
+        loadEnglishVoices();
+        window.speechSynthesis.onvoiceschanged = loadEnglishVoices;
+    }
 
     function stopSpeaking(){
         ttsStopped = true;
@@ -1046,21 +1074,56 @@
     function speakEnglish(elementId){
         const el = document.getElementById(elementId);
         if(!el) return;
-        const text = (el.innerText || el.textContent || '').trim();
+        // Get clean text - innerText gives natural line breaks
+        let text = (el.innerText || el.textContent || '').trim();
         if(!text) return;
+
+        // Clean for better natural English speech
+        text = text
+            .replace(/\s+/g, ' ')           // collapse multiple spaces
+            .replace(/\n+/g, '. ')          // newlines become sentence pauses
+            .replace(/\.\s*\./g, '.')       // avoid double periods
+            .replace(/\s+([,.!?])/g, '$1')  // clean spacing before punctuation
+            .trim();
+
         stopSpeaking();
         ttsStopped = false;
         const token = ++ttsToken;
 
         if('speechSynthesis' in window){
             const u = new SpeechSynthesisUtterance(text);
-            u.lang = 'en-IN';
-            u.rate = 0.85;
-            u.pitch = 1.05;
+            u.lang = 'en-US';          // Clear standard English style
+            u.rate = 0.70;             // Slower for better understanding (Class 1)
+            u.pitch = 1.0;
+            u.volume = 1.0;
+
+            // Pick the best available English voice
+            if (englishVoices.length > 0) {
+                // Prefer non-local / high quality if available
+                const preferred = englishVoices.find(v => 
+                    v.name.toLowerCase().includes('google') || 
+                    v.name.toLowerCase().includes('microsoft') ||
+                    v.name.toLowerCase().includes('samantha') ||
+                    v.name.toLowerCase().includes('daniel') ||
+                    v.name.toLowerCase().includes('karen') ||
+                    v.name.toLowerCase().includes('moira')
+                ) || englishVoices[0];
+                u.voice = preferred;
+                u.lang = preferred.lang;
+            }
+
             u.onend = () => {};
-            window.speechSynthesis.speak(u);
+            u.onerror = () => {};
+
+            // Small delay helps some browsers load voice properly
+            setTimeout(() => {
+                if (!ttsStopped && token === ttsToken) {
+                    window.speechSynthesis.speak(u);
+                }
+            }, 50);
         }
     }
+
 
     // Coloring SVG
     let svgColor = '#ef4444';
